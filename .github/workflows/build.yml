@@ -25,11 +25,9 @@ jobs:
       - name: Aggiorna compileSdk a 36
         run: |
           if [ -f android/app/build.gradle.kts ]; then
-            sed -i -E 's/compileSdk[[:space:]]=./compileSdk = 36/' android/app/build.gradle.kts
-            echo 'subprojects { plugins.withId("com.android.library") { extensions.configure<com.android.build.gradle.LibraryExtension>("android") { compileSdk = 36 } } }' >> android/build.gradle.kts
+            sed -i 's/flutter\.compileSdkVersion/36/g' android/app/build.gradle.kts
           elif [ -f android/app/build.gradle ]; then
-            sed -i -E 's/compileSdk(Version)?[[:space:]]=?[[:space:]].*/compileSdk 36/' android/app/build.gradle
-            echo 'subprojects { plugins.withId("com.android.library") { android { compileSdk 36 } } }' >> android/build.gradle
+            sed -i 's/flutter\.compileSdkVersion/36/g' android/app/build.gradle
           fi
       - run: flutter pub get
       - run: flutter build apk --release
