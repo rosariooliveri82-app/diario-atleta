@@ -1,0 +1,59 @@
+name: Build app
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Genera cartelle piattaforma
+        run: flutter create . --project-name diario_atletica --org it.atletica --platforms=android,ios
+      - name: Nome app Android
+        run: sed -i 's/android:label="[^"]*"/android:label="Diario Atletica"/' android/app/src/main/AndroidManifest.xml
+      - run: flutter pub get
+      - run: flutter build apk --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: diario-atletica-android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Genera cartelle piattaforma
+        run: flutter create . --project-name diario_atletica --org it.atletica --platforms=android,ios
+      - name: Permessi iOS (foto, fotocamera)
+        run: |
+          PL=ios/Runner/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryUsageDescription string Serve per importare la foto della tessera" $PL
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string Serve per fotografare la tessera" $PL
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName Diario\ Atletica" $PL
+      - run: flutter pub get
+      - name: Build iOS (senza firma)
+        run: flutter build ios --release --no-codesign
+      - name: Crea IPA non firmato
+        run: |
+          mkdir Payload
+          cp -r build/ios/iphoneos/Runner.app Payload/
+          zip -r diario-atletica-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: diario-atletica-ios-unsigned
+          path: diario-atletica-unsigned.ipa
