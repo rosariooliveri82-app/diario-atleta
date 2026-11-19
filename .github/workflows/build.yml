@@ -22,12 +22,23 @@ jobs:
         run: flutter create . --project-name diario_atletica --org it.atletica --platforms=android,ios
       - name: Nome app Android
         run: sed -i 's/android:label="[^"]*"/android:label="Diario Atletica"/' android/app/src/main/AndroidManifest.xml
-      - name: Aggiorna compileSdk a 36
+      - name: Aggiorna compileSdk a 36 (app e plugin)
         run: |
           if [ -f android/app/build.gradle.kts ]; then
             sed -i 's/flutter\.compileSdkVersion/36/g' android/app/build.gradle.kts
+            cat << 'EOF' >> android/build.gradle.kts
+
+          subprojects {
+              plugins.withId("com.android.library") {
+                  extensions.configure<com.android.build.gradle.LibraryExtension>("android") {
+                      compileSdk = 36
+                  }
+              }
+          }
+          EOF
           elif [ -f android/app/build.gradle ]; then
             sed -i 's/flutter\.compileSdkVersion/36/g' android/app/build.gradle
+            echo 'subprojects { plugins.withId("com.android.library") { android { compileSdk 36 } } }' >> android/build.gradle
           fi
       - run: flutter pub get
       - run: flutter build apk --release
