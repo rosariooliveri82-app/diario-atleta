@@ -9,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'models.dart';
 
 const appVersion = '0.1';
-const appCredits = '2026 Designed & Developed by Serg. Rosario OLIVERI Vers. $appVersion';
+const appCredits = '2026 Designed & Developed by Rosario OLIVERI Vers. $appVersion';
 
 class Store extends ChangeNotifier {
   late Directory _dir;
