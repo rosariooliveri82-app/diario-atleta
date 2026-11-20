@@ -1,9 +1,14 @@
-name: Build Android APK
+name: Build app
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   android:
@@ -13,37 +18,54 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "17"
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
-      - name: Genera cartella Android
-        run: flutter create . --project-name diario_atletica --org it.atletica --platforms=android
+      - name: Genera cartelle piattaforma
+        run: flutter create . --project-name diario_atletica --org it.atletica --platforms=android,web
       - name: Nome app Android
         run: sed -i 's/android:label="[^"]*"/android:label="Diario Atletica"/' android/app/src/main/AndroidManifest.xml
-      - name: Aggiorna compileSdk app a 36
-        run: |
-          if [ -f android/app/build.gradle.kts ]; then
-            sed -i 's/flutter\.compileSdkVersion/36/g' android/app/build.gradle.kts
-          elif [ -f android/app/build.gradle ]; then
-            sed -i 's/flutter\.compileSdkVersion/36/g' android/app/build.gradle
-          fi
       - run: flutter pub get
-      - name: Applica icona Android
-        run: |
-          if [ -f icona.png ]; then
-            flutter pub add --dev flutter_launcher_icons
-            printf 'flutter_launcher_icons:\n  android: true\n  ios: false\n  image_path: "icona.png"\n  adaptive_icon_background: "#FFFFFF"\n  adaptive_icon_foreground: "icona.png"\n' > flutter_launcher_icons.yaml
-            dart run flutter_launcher_icons
-          fi
-      - name: Forza compileSdk 36 su file_picker
-        run: |
-          CACHE_DIR="${PUB_CACHE:-$HOME/.pub-cache}"
-          find "$CACHE_DIR" -path "*file_picker*/android/build.gradle" -exec sed -i -E 's/compileSdk(Version)?[[:space:]]*=?[[:space:]]*[0-9]+/compileSdk 36/g' {} +
-          find "$CACHE_DIR" -path "*file_picker*/android/build.gradle.kts" -exec sed -i -E 's/compileSdk[[:space:]]*=[[:space:]]*[0-9]+/compileSdk = 36/g' {} +
+      - name: Icona app
+        run: dart run flutter_launcher_icons
       - run: flutter build apk --release
       - uses: actions/upload-artifact@v4
         with:
           name: diario-atletica-android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Genera cartelle piattaforma
+        run: flutter create . --project-name diario_atletica --org it.atletica --platforms=android,web
+      - run: flutter pub get
+      - name: Icona app
+        run: dart run flutter_launcher_icons
+      - name: Nome app web
+        run: |
+          sed -i 's/<title>[^<]*<\/title>/<title>Diario Atletica<\/title>/' web/index.html
+          sed -i 's/content="diario_atletica"/content="Diario Atletica"/' web/index.html
+          sed -i 's/"name": "[^"]*"/"name": "Diario Atletica"/; s/"short_name": "[^"]*"/"short_name": "Atletica"/' web/manifest.json
+      - name: Build web
+        run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy-web:
+    needs: web
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
