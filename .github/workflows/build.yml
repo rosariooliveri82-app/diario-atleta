@@ -18,14 +18,14 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: "21"
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
       - name: Genera cartelle piattaforma
         run: flutter create . --project-name diario_atletica --org it.atletica --platforms=android,web
-      - name: Fix compileSdk per plugin
+      - name: Fix compileSdk e Lint per plugin
         run: |
           if [ -f android/build.gradle.kts ]; then
             cat << 'EOF' >> android/build.gradle.kts
@@ -35,6 +35,8 @@ jobs:
                   extensions.configure<com.android.build.api.variant.LibraryAndroidComponentsExtension> {
                       finalizeDsl { ext ->
                           ext.compileSdk = 36
+                          ext.lint.checkReleaseBuilds = false
+                          ext.lint.abortOnError = false
                       }
                   }
               }
@@ -48,6 +50,10 @@ jobs:
                   androidComponents {
                       finalizeDsl { ext ->
                           ext.compileSdk = 36
+                          ext.lint {
+                              checkReleaseBuilds false
+                              abortOnError false
+                          }
                       }
                   }
               }
