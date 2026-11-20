@@ -11,11 +11,15 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  shared_preferences: ^2.3.3
   path_provider: ^2.1.5
   image_picker: ^1.1.2
   file_picker: ^8.1.6
+  file_saver: ^0.2.14
   share_plus: ^10.1.4
   archive: ^3.6.1
+  pdf: ^3.11.1
+  web: ^1.1.0
   fl_chart: ^0.69.0
   url_launcher: ^6.3.1
 
@@ -23,6 +27,21 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.1
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/icon.png
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: assets/icon.png
+  web:
+    generate: true
+    image_path: assets/icon.png
+    background_color: "#FFFFFF"
+    theme_color: "#C8352B"
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icon.png
