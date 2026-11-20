@@ -11,22 +11,37 @@ import 'screens_training.dart';
 import 'store.dart';
 import 'web_helpers_stub.dart' if (dart.library.js_interop) 'web_helpers_web.dart';
 
-// Colori pista: rosso tartan + verde prato, linee bianche.
-const tartan = Color(0xFFC8352B);
-const grass = Color(0xFF2E7D32);
+// Colori chiari: azzurro olimpico + giallo, con tocchi di verde e rosso.
+const azzurro = Color(0xFF0085C7);
+const giallo = Color(0xFFF4C300);
+const verde = Color(0xFF009F3D);
+const fondo = Color(0xFFF3F9FD);
 
 ThemeData _theme(Brightness b) {
-  final scheme = ColorScheme.fromSeed(seedColor: tartan, brightness: b)
-      .copyWith(secondary: grass, primary: b == Brightness.light ? tartan : null);
+  final light = b == Brightness.light;
+  final scheme = ColorScheme.fromSeed(seedColor: azzurro, brightness: b).copyWith(
+    primary: light ? azzurro : null,
+    secondary: verde,
+    tertiary: giallo,
+  );
   return ThemeData(
     colorScheme: scheme,
     useMaterial3: true,
+    scaffoldBackgroundColor: light ? fondo : null,
     appBarTheme: AppBarTheme(
-      backgroundColor: b == Brightness.light ? tartan : scheme.surface,
-      foregroundColor: b == Brightness.light ? Colors.white : scheme.onSurface,
+      backgroundColor: light ? azzurro : scheme.surface,
+      foregroundColor: light ? Colors.white : scheme.onSurface,
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: light ? Colors.white : null,
+      indicatorColor: light ? const Color(0xFFBFE4F7) : null,
+    ),
+    cardTheme: CardThemeData(
+      color: light ? Colors.white : null,
+      elevation: 1,
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: grass, foregroundColor: Colors.white),
+        backgroundColor: giallo, foregroundColor: Colors.black87),
   );
 }
 
@@ -47,6 +62,7 @@ class DiarioApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: _theme(Brightness.light),
       darkTheme: _theme(Brightness.dark),
+      themeMode: ThemeMode.light,
       locale: const Locale('it'),
       supportedLocales: const [Locale('it')],
       localizationsDelegates: const [

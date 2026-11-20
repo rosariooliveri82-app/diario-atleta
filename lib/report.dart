@@ -17,7 +17,7 @@ Future<Uint8List> buildReport({required bool includeWellness}) async {
   final recs = computeRecords(store.results);
   final results = [...store.results]..sort((x, y) => y.data.compareTo(x.data));
   final sessions = [...store.sessions]..sort((x, y) => y.data.compareTo(x.data));
-  final red = PdfColor.fromInt(0xFFC8352B);
+  final red = PdfColor.fromInt(0xFF0085C7);
 
   pw.Widget h(String t) => pw.Padding(
         padding: const pw.EdgeInsets.only(top: 14, bottom: 4),
